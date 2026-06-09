@@ -1,5 +1,10 @@
 plugins {
+    application
     id("org.openjfx.javafxplugin")
+}
+
+application {
+    mainClass = "com.papercrown.desktop.PaperCrownApp"
 }
 
 javafx {
