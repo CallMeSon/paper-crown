@@ -25,21 +25,34 @@ JavaFX Desktop  ──REST──>  Spring Boot Backend  ──>  PostgreSQL
 
 Pastikan sudah terpasang:
 
-- JDK 26 
+- JDK 26
+- Gradle
 - Docker dan Docker Compose
 - Git
 
-Cek versi Java:
+Cek versi Java dan Gradle:
 
 ```bash
 java --version
+gradle --version
 ```
+
+> Project ini tetap menyediakan Gradle Wrapper (`./gradlew`). Command di bawah memakai wrapper agar versi Gradle yang digunakan konsisten dengan project.
 
 ## Quick Start
 
 Jalankan semua command dari root repository `paper-crown/`.
 
-### 1. Start PostgreSQL
+### 1. Prepare Gradle Wrapper
+
+Jalankan perintah Gradle Wrapper terlebih dahulu, lalu pastikan file `gradlew` bisa dieksekusi:
+
+```bash
+gradle wrapper
+./gradlew --version
+```
+
+### 2. Start PostgreSQL
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
@@ -51,19 +64,12 @@ Cek database sudah hidup:
 docker compose -f docker/docker-compose.yml ps
 ```
 
-### 2. Start Backend
+### 3. Start Backend
 
 Buka terminal pertama:
 
 ```bash
 ./gradlew :backend-service:bootRun
-```
-
-Tunggu sampai muncul:
-
-```text
-Tomcat started on port 8080
-Started PaperCrownApplication
 ```
 
 Backend berjalan di:
@@ -72,7 +78,7 @@ Backend berjalan di:
 http://localhost:8080
 ```
 
-### 3. Launch Desktop Client
+### 4. Launch Desktop Client
 
 Buka terminal kedua, lalu jalankan:
 
@@ -81,90 +87,6 @@ Buka terminal kedua, lalu jalankan:
 ```
 
 Pastikan backend di terminal pertama tetap berjalan saat desktop client dibuka.
-
-## Troubleshooting
-
-### Backend gagal karena port 8080 sudah dipakai
-
-Error umum:
-
-```text
-Web server failed to start. Port 8080 was already in use.
-```
-
-Cari proses yang memakai port 8080:
-
-```bash
-ss -tlnp | grep 8080
-```
-
-Matikan prosesnya, ganti `PID` sesuai angka yang muncul:
-
-```bash
-kill PID
-```
-
-Jika belum mati:
-
-```bash
-kill -9 PID
-```
-
-Atau jalankan backend di port lain:
-
-```bash
-./gradlew :backend-service:bootRun --args='--server.port=8081'
-```
-
-### Tidak bisa connect ke backend
-
-Cek apakah backend listen di port 8080:
-
-```bash
-ss -tlnp | grep 8080
-```
-
-Jika kosong, backend belum berjalan atau gagal start. Jalankan lagi:
-
-```bash
-./gradlew :backend-service:bootRun --stacktrace
-```
-
-### PostgreSQL belum jalan
-
-Cek port database:
-
-```bash
-ss -tlnp | grep 5432
-```
-
-Jika tidak ada, start database:
-
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
-
-### Task `:desktop-client:run` tidak ditemukan
-
-Pastikan repository sudah memakai versi terbaru. Task desktop client tersedia lewat Gradle `application` plugin:
-
-```bash
-./gradlew :desktop-client:tasks --all | grep '^run'
-```
-
-Jika task ada, jalankan:
-
-```bash
-./gradlew :desktop-client:run
-```
-
-### Java 26 dan Spring Boot
-
-Project ini menjalankan Gradle dengan Java 26, tetapi compile output menggunakan `--release 21`. Jangan ubah compile release ke 26 kecuali Spring Boot/ASM sudah mendukung class file Java 26, karena bisa menyebabkan error:
-
-```text
-Unsupported class file major version 70
-```
 
 ## Build & Test
 
