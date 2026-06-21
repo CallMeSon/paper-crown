@@ -58,6 +58,33 @@ public class PlayViewModel {
         });
     }
 
+    public void startNewRun() {
+        loading.set(true);
+        error.set(false);
+        executor.execute(() -> {
+            try {
+                RunDTO run = client.startRun();
+                Platform.runLater(() -> {
+                    // Reset game states for a fresh start
+                    runEnded.set(false);
+                    finalRun.set(null);
+                    buffChoice.set(null);
+                    lastOutcome.set(null);
+                    lastPlayerMove.set(null);
+                    lastBotMove.set(null);
+                    roundHistory.set(FXCollections.observableArrayList());
+                    
+                    applyRunState(run);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> error.set(true));
+            } finally {
+                Platform.runLater(() -> loading.set(false));
+            }
+        });
+    }
+
     public void submitMove(Move move) {
         loading.set(true);
         error.set(false);
